@@ -16,8 +16,8 @@
 7. Create a config file ```config.yml``` in home directory i.e., ```~/config.yml``` with following content
 8.      # add the following two lines, replacing the text 123.456.789 with your server's IP address.
         # Keep the quotes.
-        EDXAPP_LMS_BASE: "123.456.789"
-        EDXAPP_CMS_BASE: "123.456.789"
+        EDXAPP_LMS_BASE: "paatha.org"
+        EDXAPP_CMS_BASE: "studio.paatha.org"
 9.      sudo wget https://github.com/luckynirania/edx-production-setup/blob/main/edx.platform-install.sh
         sudo chmod 755 edx.platform-install.sh
         sudo nohup ./edx.platform-install.sh & # it will take about 90 minutes in background, so chill
@@ -48,6 +48,9 @@
         cd /edx/app/edxapp/edx-platform
         ./manage.py lms --settings production changepassword yourusername
 
+# Binding Domain Name
+1. Do the A entry for both lms and cms domains using your domain name provider
+
 # Setting up SMTP
 1. Edit ```/edx/app/edxapp/lms.auth.json```
     1.      EMAIL_HOST_PASSWORD: 'password'
@@ -72,6 +75,41 @@
 6. Edit ```/edx/etc/studio.yml```
     All those above changes in this file too
 7. Restart server to take effect
+    1.      /edx/bin/supervisorctl restart lms
+            /edx/bin/supervisorctl restart cms
+            /edx/bin/supervisorctl restart edxapp_worker:
+
+# Changing Platform Name
+1. set ```PLATFORM_NAME``` variable in both  ```/edx/etc/lms.yml``` and ```/edx/etc/studio.yml```
+2. Restart server to take effect
+    1.      /edx/bin/supervisorctl restart lms
+            /edx/bin/supervisorctl restart cms
+            /edx/bin/supervisorctl restart edxapp_worker:
+
+# SSL certificate
+1. add domain name for which we apply for SSL
+    1.    ```server_name paatha.org``` to server block in file ```/edx/app/nginx/sites-available/lms```
+    2. ```server_name studio.paatha.org``` to server block in file ```/edx/app/nginx/sites-available/cms```
+2. Install Certbot
+    1.      sudo apt-get update
+            sudo apt-get install software-properties-common
+            sudo add-apt-repository universe
+            sudo add-apt-repository ppa:certbot/certbot
+            sudo apt-get update
+            sudo apt-get install certbot python-certbot-nginx
+3. Apply for SSL
+    1.     sudo certbot --authenticator standalone --installer nginx --pre-hook "service nginx stop" --post-hook "service nginx start"
+    2. provide your email for alerts and accept terms and conditions
+    3. The prompt should show the domain names for which we will applying the SSL
+    4. Select All domain name
+    5. Choose option 2 to enable redirect http to https
+    6. If all things work as planned, Congratualtions message should appear under IMPORTANT NOTES
+
+# Redirection issues
+1. It may happen that after logging from studio, we get redirected to lms. To resolve, edit in configuration files we changed during SMTP setup the following
+2. ```SESSION_COOKIE_DOMAIN``` to ```".paatha.org"``` 
+3. ```LOGIN_REDIRECT_WHITELIST``` is set to ```"studio.paatha.org"```
+4. Restart server to take effect
     1.      /edx/bin/supervisorctl restart lms
             /edx/bin/supervisorctl restart cms
             /edx/bin/supervisorctl restart edxapp_worker:
