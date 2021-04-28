@@ -18,7 +18,7 @@
         # Keep the quotes.
         EDXAPP_LMS_BASE: "paatha.org"
         EDXAPP_CMS_BASE: "studio.paatha.org"
-9.      sudo wget https://github.com/luckynirania/edx-production-setup/blob/main/edx.platform-install.sh
+9.      sudo wget https://raw.githubusercontent.com/luckynirania/edx-production-setup/main/edx.platform-install.sh
         sudo chmod 755 edx.platform-install.sh
         sudo nohup ./edx.platform-install.sh & # it will take about 90 minutes in background, so chill
 10. To check whether the process is finished or is ongoing, just do ```sudo /edx/bin/supervisorctl status```. If entries are the following, then script is finished
